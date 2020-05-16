@@ -20,3 +20,7 @@ Results from the above expect outcomes will have a positive impact by reducing t
 
 ## Mountaintop Summer Experience (MTSE) 2020
 This project is supported by students participating in Lehigh University's(Mountaintop Summer Experience)[https://creativeinquiry.lehigh.edu/mountaintop-programs/mountaintop-summer-experience], a 10 week intensive program with a focus on transforming ideas into practical tools. 
+
+## Contact
+tom mcandrew: mcandrew@lehigh.edu
+
