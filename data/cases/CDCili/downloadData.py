@@ -1,7 +1,7 @@
 #mcandrew
 
 import sys
-sys.path.append('..')
+sys.path.append('../..')
 
 import numpy as np
 import pandas as pd
@@ -9,7 +9,7 @@ import pandas as pd
 from delphi_epidata import Epidata
 from epiweeks import Week, Year
 
-from downloadHelper.cases import timestamp
+from downloadHelper.downloadtools import timestamp
 
 class downloader(object):
     def __init__(self,state='',region=''):

@@ -1,12 +1,12 @@
 #mcandrew
 
 import sys
-sys.path.append('..')
+sys.path.append('../..')
 
 import numpy as np
 import pandas as pd
 
-from downloadHelper.cases import timestamp
+from downloadHelper.downloadtools import timestamp
 
 if __name__ == "__main__":
  

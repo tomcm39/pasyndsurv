@@ -1,12 +1,12 @@
 #mcandrew
 
 import sys
-sys.path.append('..')
+sys.path.append('../..')
 
 import numpy as np
 import pandas as pd
 
-from downloadHelper.cases import timestamp
+from downloadHelper.downloadtools import timestamp
 
 if __name__ == "__main__":
     covidtracking = pd.read_csv("https://covidtracking.com/api/v1/states/PA/daily.csv") 
