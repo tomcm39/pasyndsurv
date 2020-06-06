@@ -4,7 +4,7 @@ Team members: Yijua (Eunice) Liu & Michael Nelson
 Model Description Short: Using (clustering?) (ARIMA?) to forecast the number of new
 COVID-19 Cases
 
-Model Description Long: TBD
+Model Description Long: To be done later
 
  - Model assumptions
 
