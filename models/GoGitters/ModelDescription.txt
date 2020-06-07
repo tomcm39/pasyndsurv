@@ -1,8 +1,7 @@
 Team name: The GoGitters
 Team members: Yijua (Eunice) Liu & Michael Nelson
 
-Model Description Short: Using (clustering?) (ARIMA?) to forecast the number of new
-COVID-19 Cases
+Model Description Short: Using ARIMA(AutoRegressive Integrated Moving Average) model with clustering concepts to forecast the number of new COVID-19 Cases
 
 Model Description Long: To be done later.
 
