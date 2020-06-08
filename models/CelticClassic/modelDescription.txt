@@ -1,7 +1,7 @@
 Team name: Celtic Classic
 Team members: Damon Luk, Martin Magazzolo 
 
-Model Description Short: 
+Model Description Short: A SIR model to forecast the number of new COVID-19 cases
 
 Model Description Long:
 
