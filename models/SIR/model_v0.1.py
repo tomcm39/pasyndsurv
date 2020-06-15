@@ -12,7 +12,7 @@ class SIR(object):
         self.I0 = I0
         self.R0 = R0
         self.N = S0+I0+R0
-
+        
         self.beta = beta
         self.gamma = gamma
 
@@ -64,6 +64,59 @@ class SIR(object):
             pop['R'].append( Rt )
         self.epidemicMeanData = pd.DataFrame(pop)
 
+    def inference(self,observedData):
+        import pymc3 as pm
+        import theano.tensor as tt
+
+        def Smean(Stm1,Itm1,beta,N):
+            return Stm1-Stm1*beta*Itm1/N
+        
+        def Imean(Stm1,Itm1,beta,gamma,N):
+            return Itm1 + Stm1*Itm1*beta/N - Itm1*gamma
+
+        def Rmean(Rtm1,Itm1,gamma):
+            return Rtm1 + Itm1*gamma
+
+        def proposeEpidemic(S0,I0,R,beta,gamma,timesteps=10):
+            pop = { "S":[S0], "I":[I0],"R":[R0]}
+            N = S0+I0+R0
+            
+            for t in range(timesteps-1):
+                Stm1,Itm1,Rtm1 = pop["S"][-1], pop["I"][-1], pop["R"][-1]
+        
+                St = Smean(Stm1,Itm1 ,beta,N)
+                It = Imean(Stm1,Itm1,beta,gamma,N)
+                Rt = Rmean(Rtm1,Itm1,gamma)
+
+                pop['S'].append( St )
+                pop['I'].append( It )
+                pop['R'].append( Rt )
+            return pop['S'], pop['I'], pop['R']
+        
+        timesteps    = len(observedData)
+
+        S0,I0,R0 = observedData.iloc[0]
+
+        p = proposeEpidemic( S0,I0,R0, 1., 0.5, timesteps )
+        self.p = p
+        
+        with pm.Model() as model:
+            beta  = pm.Normal('beta'  ,mu=1,sigma=0.5)
+            gamma = pm.Normal('gamma' ,mu=1,sigma=0.5)
+
+            sigma = pm.Gamma('sigma', 0.5,0.5 )
+
+            meanS, meanI, meanR = proposeEpidemic( S0,I0,R0, beta, gamma, timesteps )
+
+            allObs        = list(observedData.I.values) + list(observedData.R.values)
+            meanIandMeanR = meanI + meanR
+            
+            obs = pm.MvNormal('obs',observed = allObs , mu = meanIandMeanR ,cov=sigma*np.eye(timesteps*2))
+            
+        with model:
+            trace = pm.sample(2*10**3)
+            self.trace = trace
+            
 if __name__ == "__main__":
 
     bin = np.random.binomial
@@ -75,60 +128,36 @@ if __name__ == "__main__":
     beta=1.
     gamma=0.5
 
-    epidemic = SIR( S0,I0,R0,beta,gamma)
+    epidemic = SIR(S0,I0,R0,beta,gamma)
     epidemic.generateEpidemic(50)
+    
+    O = epidemic.epidemicData
+    
+    epidemic.inference(O)
+    
+    parameterSamples = epidemic.trace
+    betas  = parameterSamples.get_values('beta')
+    gammas = parameterSamples.get_values('gamma')
+    
+    epidemic = SIR(S0,I0,R0,beta = np.mean(betas) ,gamma = np.mean(gammas))
     epidemic.generateMeanEpidemic(50)
-
+    
     fig,ax = plt.subplots()
 
-    ax.plot(epidemic.epidemicMeanData)
+    ax.scatter(O.index,O.S,s=10,alpha=0.4)
+    ax.scatter(O.index,O.I,s=10,alpha=0.4)
+    ax.scatter(O.index,O.R,s=10,alpha=0.4)
+        
+    ax.plot(epidemic.epidemicMeanData.S, label='Susc') 
+    ax.plot(epidemic.epidemicMeanData.I, label='Infec')
+    ax.plot(epidemic.epidemicMeanData.R, label='Recov')
+   
+    ax.set_xlabel("Epidemic Week")
+    ax.set_ylabel("Absolute number")
 
+    ax.legend()
+    
     plt.show()
- 
 
-
-    
-    
-    # epiData = epidemic.epidemicData
-
-    # def propose(gamma,beta):
-    #     while True:
-    #         gamma += np.random.normal(0,1) # prior
-    #         if 0 < gamma < 1:
-    #             break
-
-    #     while True:
-    #         beta += np.random.normal(0,1) # prior
-    #         if beta >0:
-    #             break
-    #     return gamma,beta
-    
-    # gamma,beta = propose(1,1)
-    # epidemic = SIR(S0,I0,R0,beta,gamma)
-    # epidemic.generateEpidemic(50)
-    # epidemic.generateMeanEpidemic(50)
-
-    
-    # def evaluateLikelihoodOfParams(epiData):
-    #     prevLogLike = -np.inf
-    #     logLikelihood = 0.
-    #     for time,(s,i,r) in epiData.iloc[1:].iterrows(): # skip the first row
-    #         stm1,itm1,rtm1 = epiData.iloc[time-1]    
-
-    #         prob = scipy.stats.binom( itm1,gamma ).pmf( r-rtm1 )
-    #         logProb = np.log(prob)
-    #         logLikelihood+=logProb
-    #     return logLikelihood
-
-    # def hop(prevLogLike,logLikelihood):
-    #     if logLikelihood >= prevLogLike:
-    #         currentBeta  = beta
-    #         currentGamma = gamma
-    #     else:
-    #         if np.log(np.random.uniform()) < logLikelihood-prevLogLike:
-    #             currentBeta  = beta
-    #             currentGamma = gamma
-    #         else:
-    #             currentGamma, currentBeta = propose(gamma,beta)
-
-    
+    #TODO:
+    # You need to make this a probabilistic distribution, not just the mean prediction
