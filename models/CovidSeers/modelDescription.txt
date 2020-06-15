@@ -1,9 +1,8 @@
-Team name: covidCrushers
-Team members: Kenny Lin, Alex Kline
+Team name: CovidSeers
+Team members: Poplar, Andrew
 
-Model Description Short: to be completed
-
-test 
+Model Description Short: A KNN model to forecast the number of new
+COVID-19 Cases
 
 Model Description Long:
 
