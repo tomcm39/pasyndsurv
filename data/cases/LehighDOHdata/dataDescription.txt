@@ -9,7 +9,7 @@ This is the data compiled by Jeremy Mack of Lehigh University, sourcing from the
 Unknown.
 
 ##Contents:
-Contains cumulative number of new positives for each county in Pennsylvania, referenced by both fips and county.
+Contains cumulative (historical) number of new positives for each county in Pennsylvania, referenced by both fips and county.
 
 ##Accuracy:
 Most likely good if referenced directly from DOH data. 
