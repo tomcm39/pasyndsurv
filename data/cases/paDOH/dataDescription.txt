@@ -10,7 +10,7 @@ This is data direcyly from the PA DOH website.
 https://www.health.pa.gov/topics/disease/coronavirus/Pages/Cases.aspx
 
 ##Contents:
-Contains cumulative number of comfirmed/probable cases of COVID-19 as well as negative test results and estimatead total tests (calculated by adding comfirmed + negative cases) for each county in Pennsylvania referenced by county name and fips.
+Contains total (up to present) number of comfirmed/probable cases of COVID-19 as well as negative test results and estimatead total tests (calculated by adding comfirmed + negative cases) for each county in Pennsylvania referenced by county name and fips.
 
 ##Accuracy:
 Most likely good. Straight from the source.

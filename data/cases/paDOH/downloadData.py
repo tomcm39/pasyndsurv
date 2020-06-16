@@ -9,7 +9,6 @@ from downloadHelper.downloadtools import listPACounties
 
 if __name__ == "__main__":
     data_link = "https://www.health.pa.gov/topics/Documents/Diseases%20and%20Conditions/COVID-19%20County%20Data/County%20Case%20Counts_6-15-2020.pdf"
-    #web_data = tabula.read_pdf(data_link, pages="all", multiple_tables = True)
 
     return_file = './dohCumulative_{:s}.csv'.format(timestamp())
     tabula.convert_into(data_link, return_file, pages="all")
@@ -26,7 +25,7 @@ if __name__ == "__main__":
         data_frame['Est_Tot_Tests'] = test_col  # estimated total tests
 
     def add_fips(df):
-        df.insert(1, 'fips', county2fips)
+        df.insert(1, 'Fips', county2fips)
 
     cal_tot_tests(doh_DF)
     add_fips(doh_DF)

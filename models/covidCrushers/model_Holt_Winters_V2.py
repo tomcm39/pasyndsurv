@@ -1,4 +1,4 @@
-#mcandrew,kline,lin
+# mcandrew,kline,lin
 
 import sys
 import numpy as np
@@ -32,7 +32,7 @@ def onClick():
 button = tk.Button(r, text='PLOT', width=5, bg = 'purple', fg = 'white', command=onClick) 
 button.grid(column=1, row=3)
 
-allData = pd.read_csv("https://raw.githubusercontent.com/Alexman735/pasyndsurv/master/data/cases/PATrainingDataCases.csv")
+allData = pd.read_csv("../../data/cases/PATrainingDataCases.csv")
 
 
 
