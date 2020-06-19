@@ -1,0 +1,21 @@
+#Model: PA DOH
+
+##Raw Data Link: 
+https://www.health.pa.gov/topics/Documents/Diseases%20and%20Conditions/COVID-19%20County%20Data/County%20Case%20Counts_6-15-2020.pdf
+
+##Database Description:
+This is data direcyly from the PA DOH website. 
+
+##Database Link:
+https://www.health.pa.gov/topics/disease/coronavirus/Pages/Cases.aspx
+
+##Contents:
+Contains total (up to present) number of comfirmed/probable cases of COVID-19 as well as negative test results and estimatead total tests (calculated by adding comfirmed + negative cases) for each county in Pennsylvania referenced by county name and fips.
+
+##Accuracy:
+Most likely good. Straight from the source.
+
+Source: Pennsylvania National Electronic Disease Surveillance System (PA-NEDSS)
+
+##Usefulness:
+Limited. Only cumulative data availible but county level testing data could be useful. 
