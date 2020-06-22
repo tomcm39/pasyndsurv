@@ -9,7 +9,7 @@ import seaborn as sns
 import scipy
 from statsmodels.tsa.arima_model import ARIMA # note the import here (you may need to pip3 install statsmodel)
 
-class covidSeers(object):
+class CovidSeers(object):
     # Copy this section 
     def __init__(self):
         pass
@@ -114,7 +114,7 @@ class covidSeers(object):
             # https://www.statsmodels.org/stable/generated/statsmodels.tsa.arima_model.ARIMA.html
 
             fipData = fipData.replace(np.nan,0.)
-            arimaModel = ARIMA( fipData, order=(1,0,0) )
+            arimaModel = ARIMA( fipData, order=(1,1,1) )
             fittedModel = arimaModel.fit()
                 
             lastWeekOfData = fipData.index.max()
@@ -137,7 +137,6 @@ class covidSeers(object):
                              ,'weekahead':[weekahead]*nBins
                              ,'prob':distOfForecasts[:,weekahead-1]}
             allForecastData = allForecastData.append( pd.DataFrame(forecastData)  )
-        allForecastData['modelname'] = 'covidSeers_KNN'
         return allForecastData
         
 if __name__ == "__main__":
