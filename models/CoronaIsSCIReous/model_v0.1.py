@@ -7,18 +7,28 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 class SIR(object):
+    #construct the variables needed for this model
     def __init__(self,S0,I0,R0,beta,gamma):
         self.S0 = S0
         self.I0 = I0
         self.R0 = R0
+        #N is the total population (we are assuming that the whole population is in either S, I, or R)
         self.N = S0+I0+R0
-        
+        #beta is the rate at which a Susceptible becomes Infected (contact rate)
         self.beta = beta
+        #gamma is the rate an infected becomes Recovered
         self.gamma = gamma
+
+
+    #-----------------------------------------------------------------
+        #define each class and how it is calculated using differential equations
+        #we are now using the binomial distribution (bin) 
+        #X~Bin(N,P) : Out of n possible trials, select one of the probability P then sum up all the X’s 
+        #for now, we are taking the mean of the binomial distribution for each class 
+    #-----------------------------------------------------------------
 
     def S(self,Stm1,Itm1):
         return Stm1-bin(Stm1, self.beta*Itm1/self.N)
-
     def Smean(self,Stm1,Itm1):
         return Stm1-Stm1*self.beta*Itm1/self.N
         
@@ -34,6 +44,9 @@ class SIR(object):
     def Rmean(self,Rtm1,Itm1):
         return Rtm1 + Itm1*self.gamma
 
+    #-----------------------------------------------------------------
+    #Here we basically put the values for all the categories (S,I,R) in one data frame
+    #-----------------------------------------------------------------
     def generateEpidemic(self,timesteps=10):
         pop = { "S":[self.S0], "I":[self.I0],"R":[self.R0]}
 
@@ -134,14 +147,14 @@ if __name__ == "__main__":
     O = epidemic.epidemicData
     
     epidemic.inference(O)
-    
+    #Sample out the probable betas and gammas 
     parameterSamples = epidemic.trace
     betas  = parameterSamples.get_values('beta')
     gammas = parameterSamples.get_values('gamma')
     
     epidemic = SIR(S0,I0,R0,beta = np.mean(betas) ,gamma = np.mean(gammas))
     epidemic.generateMeanEpidemic(50)
-    
+    #plot the data 
     fig,ax = plt.subplots()
 
     ax.scatter(O.index,O.S,s=10,alpha=0.4)
