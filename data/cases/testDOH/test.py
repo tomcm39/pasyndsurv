@@ -28,7 +28,7 @@ def add_test_col(data_frame, test_col):
 def add_fips(df, countyList):
     df.insert(1, 'Fips', countyList)
 
-# inserts repeated date row a df
+# inserts repeated date row to a df
 def add_date(df, date):
     df.insert(0, 'Date', date)
 
@@ -49,33 +49,33 @@ def extract_data(raw_links, list_dates, dict_links):
         # update dates and links
         list_dates.append(date)
         dict_links.update({date: full_link})
-        
-    #change to ascending order (by time)
+    #change to ascending order (in time)
     list_dates.reverse()
 
-# downloads raw file data for DOH
-def downloadData(list_dates):
-    print()
-    print("Starting data download...")
-    print("_______________________________________________")
+
+# converts pdfs into df and adds to dict_df 
+def downloadData(list_dates, dict_df):
     for curr_date in list_dates:
         return_file = 'data/dohData_' + curr_date + '.csv'
-        print("Creating file... " + return_file)
-        tabula.convert_into(dict_links[curr_date], return_file, pages="all")
-    print()
-    print("Finished downloading data!")
+        df_pdf = tabula.read_pdf(dict_links[curr_date], pages="all")
+        print(type(df_pdf))
+        print(df_pdf)
+        # date is the key, df is value
+        dict_df.update({curr_date: df_pdf})
+        #tabula.convert_into(dict_links[curr_date], return_file, pages="all")
+        print("Read file: " + return_file)
 
 # checks two input strings and checks if they are equal
 # for exception files
 def verifyHeader(current_header, standard_header, curr_file):
     if ( (current_header != standard_header)):
         print()
-        print("ERROR: Skipped augmentation of " + curr_file + \
+        print("Skipped augmentation of " + curr_file + \
               " due to nonstandard header.")
+        print("File Header: ")
         print(current_header)
         print()
         return 1 # true (is not a valid header)
-        
     return 0 # false (is a valid header)
 
 # aggregate datas files for each date
@@ -86,24 +86,19 @@ def aggregateFiles(list_dates):
     standard_header = ['County', 'Region', 'Cases', 'Confirmed', \
                             'Probable', 'PersonsWithNegativePCR']
 
-    print()
-    print("Starting file augmentation...")
-    print("_______________________________________________")
     for curr_date in list_dates:
+
         prev_date = list_dates[prev_iter]
         # these are file names
         curr_file = 'data/dohData_' + curr_date + '.csv'
-        prev_file = 'data/dohData_' + prev_date + '.csv'
+        #prev_file = 'data/dohData_' + prev_date + '.csv'
 
-        print("Augmenting file... " + curr_file)
-
-        curr_df = pd.read_csv(curr_file)
-        prev_df = pd.read_csv(prev_file)
+        curr_df = dict_df.get(curr_date)
+        prev_df = dict_df.get(prev_date)
 
         # skip non standard files
-        
-        current_header = list(curr_df.columns)  
-        
+        print(curr_df.columns)
+        current_header = list(curr_df.columns)
         if (verifyHeader(current_header, standard_header, curr_file)):
             curr_iter += 1
             continue
@@ -128,8 +123,8 @@ def aggregateFiles(list_dates):
 
         curr_df.to_csv(curr_file, index=False)
         curr_df.to_csv(curr_file, index=False)
-    print()
-    print("Finished augmenting files!")
+
+        print("Augmented file: " + curr_file)
 
 # reads in all files 
 '''
@@ -157,7 +152,9 @@ county2fips = [fip for (fip, county) in fips2county.items()]
 # store date + url from html to list_dates, dict_links
 list_dates = []
 dict_links = {}
+dict_df = {}
 extract_data(raw_links, list_dates, dict_links)
 
-downloadData(list_dates)
+downloadData(list_dates, dict_df)
+print()
 aggregateFiles(list_dates)
