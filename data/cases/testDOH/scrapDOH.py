@@ -75,8 +75,15 @@ def verifyHeader(current_header, standard_header, curr_file):
         print(current_header)
         print()
         return 1 # true (is not a valid header)
-        
     return 0 # false (is a valid header)
+
+# reads in DOH data files generated and stores as df in dict
+# dict key = date, value = df
+def file_to_dictDF(list_dates, dict_df):
+    for date in list_dates:
+        curr_file = 'data/dohData_' + date + '.csv'
+        curr_df = pd.read_csv(curr_file)
+        dict_df.update({date: curr_df})
 
 # aggregate datas files for each date
 def aggregateFiles(list_dates):
@@ -96,14 +103,11 @@ def aggregateFiles(list_dates):
         prev_file = 'data/dohData_' + prev_date + '.csv'
 
         print("Augmenting file... " + curr_file)
-
-        curr_df = pd.read_csv(curr_file)
-        prev_df = pd.read_csv(prev_file)
+        curr_df = dict_df.get(curr_date)
+        prev_df = dict_df.get(prev_date)
 
         # skip non standard files
-        
-        current_header = list(curr_df.columns)  
-        
+        current_header = list(curr_df.columns)
         if (verifyHeader(current_header, standard_header, curr_file)):
             curr_iter += 1
             continue
@@ -132,14 +136,14 @@ def aggregateFiles(list_dates):
     print("Finished augmenting files!")
 
 # reads in all files 
-'''
-def aggregateTests(list_dates):
-    for curr_date in list_dates:
-'''
+#def aggregateTests(list_dates):
+    #for curr_date in list_dates:
+        
+
 # END METHODS #
 
 #July Archive
-july_url = '''https://www.health.pa.gov/topics/disease/coronavirus/Pages/Archives.aspx'''
+july_url = "https://www.health.pa.gov/topics/disease/coronavirus/Pages/Archives.aspx"
 
 uClient = urlopen(july_url)
 page_html = uClient.read()
@@ -157,7 +161,9 @@ county2fips = [fip for (fip, county) in fips2county.items()]
 # store date + url from html to list_dates, dict_links
 list_dates = []
 dict_links = {}
+dict_df = {}
 extract_data(raw_links, list_dates, dict_links)
 
+file_to_dictDF(list_dates, dict_df)
 downloadData(list_dates)
 aggregateFiles(list_dates)
