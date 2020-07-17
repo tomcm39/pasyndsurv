@@ -52,6 +52,65 @@ def extract_data(raw_links, list_dates, dict_links):
     #change to ascending order (in time)
     list_dates.reverse()
 
+# downloads raw file data for DOH
+def downloadData(list_dates):
+    for curr_date in list_dates:
+        return_file = 'data/dohData_' + curr_date + '.csv'
+        tabula.convert_into(dict_links[curr_date], return_file, pages="all")
+        print("Created file: " + return_file)
+
+# aggregate datas files for each date
+def aggregateFiles(list_dates):
+    prev_iter = 0
+    curr_iter = 0
+    for curr_date in list_dates:
+        prev_date = list_dates[prev_iter]
+        # these are file names
+        curr_file = 'data/dohData_' + curr_date + '.csv'
+        prev_file = 'data/dohData_' + prev_date + '.csv'
+
+        curr_df = pd.read_csv(curr_file)
+        prev_df = pd.read_csv(prev_file)
+
+        # for exception files
+        standard_header = ['County', 'Region', 'Cases', 'Confirmed', \
+                            'Probable', 'PersonsWithNegativePCR']
+        '''changed_header = ['County', 'Fips', 'Region', 'Cases', \
+                          'Confirmed', 'Probable', 'PersonsWithNegativePCR',\
+                          'Est_Tot_Tests','Date', 'Last Date', \
+                          'Change From Last Date']'''
+
+        current_header = list(curr_df.columns)        
+        # skip non standard files
+        if ( (current_header != standard_header)):
+            curr_iter += 1
+            print("Skipped " + curr_file + "due to nonstandard header.")
+            print("File Header: " + current_header)
+            continue
+        else:
+            prev_iter = curr_iter
+            curr_iter += 1
+        
+        # augments data from the DOH wit test totals and fip numbers
+        curr_tests = cal_tot_tests(curr_df)
+        prev_tests = cal_tot_tests(prev_df)
+
+        add_test_col(curr_df, curr_tests)
+        add_fips(curr_df, county2fips)
+
+        # change in num of tests from last date
+        change_tests = curr_tests - prev_tests
+
+        curr_df.insert(len(curr_df.columns), 'Date', curr_date)
+        curr_df.insert(len(curr_df.columns), 'Last Date', prev_date)
+        curr_df.insert(len(curr_df.columns), 'Change From Last Date', \
+                        change_tests)
+
+        curr_df.to_csv(curr_file, index=False)
+        curr_df.to_csv(curr_file, index=False)
+
+        print("Augmented file: " + curr_file)
+
 # END METHODS #
 
 #July Archive
@@ -74,77 +133,6 @@ county2fips = [fip for (fip, county) in fips2county.items()]
 list_dates = []
 dict_links = {}
 extract_data(raw_links, list_dates, dict_links)
-
-# downloads raw file data for DOH
-def downloadData(list_dates):
-    for curr_date in list_dates:
-        return_file = 'data/dohData_' + curr_date + '.csv'
-        tabula.convert_into(dict_links[curr_date], return_file, pages="all")
-        print("Created file: " + return_file)
-
-# aggregate datas files for each date
-def aggregateFiles(list_dates):
-    print("hee")
-    prev_iter = 0
-    curr_iter = 0
-    for curr_date in list_dates:
-        prev_date = list_dates[prev_iter]
-        # these are file names
-        curr_file = 'data/dohData_' + curr_date + '.csv'
-        prev_file = 'data/dohData_' + prev_date + '.csv'
-        '''
-        # refer to the next iteration
-        # there's prob a better way to do this...
-        if (prev_iter == 0): 
-            continue
-        '''
-
-        curr_df = pd.read_csv(curr_file)
-        prev_df = pd.read_csv(prev_file)
-
-        # for exception files
-        standard_header = ['County', 'Region', 'Cases', 'Confirmed', \
-                            'Probable', 'PersonsWithNegativePCR']
-        '''changed_header = ['County', 'Fips', 'Region', 'Cases', \
-                          'Confirmed', 'Probable', 'PersonsWithNegativePCR',\
-                          'Est_Tot_Tests','Date', 'Last Date', \
-                          'Change From Last Date']'''
-
-        current_header = list(curr_df.columns)
-        #last_header = list(prev_df.columns)
-
-        #print(curr_header)
-        
-        # checking for non standard files
-        if ( (current_header != standard_header)):
-            curr_iter += 1
-            print(current_header)
-            continue
-        else:
-            prev_iter = curr_iter
-            curr_iter += 1
-            print("success")
-        
-        
-        # augments data from the DOH wit test totals and fip numbers
-        curr_tests = cal_tot_tests(curr_df)
-        prev_tests = cal_tot_tests(prev_df)
-
-        add_test_col(curr_df, curr_tests)
-        add_fips(curr_df, county2fips)
-
-        # change in num of tests from last date
-        change_tests = curr_tests - prev_tests
-
-        curr_df.insert(len(curr_df.columns), 'Date', curr_date)
-        curr_df.insert(len(curr_df.columns), 'Last Date', prev_date)
-        curr_df.insert(len(curr_df.columns), 'Change From Last Date', \
-                        change_tests)
-
-        curr_df.to_csv(curr_file, index=False)
-        curr_df.to_csv(curr_file, index=False)
-
-        print("Changed file: " + curr_file)
 
 downloadData(list_dates)
 aggregateFiles(list_dates)
