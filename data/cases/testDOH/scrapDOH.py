@@ -59,10 +59,27 @@ def downloadData(list_dates):
         tabula.convert_into(dict_links[curr_date], return_file, pages="all")
         print("Created file: " + return_file)
 
+# checks two input strings and checks if they are equal
+# for exception files
+def verifyHeader(current_header, standard_header, curr_file):
+    if ( (current_header != standard_header)):
+        print()
+        print("Skipped " + curr_file + " due to nonstandard header.")
+        print("File Header: ")
+        print(current_header)
+        print()
+        return 1 # true (is not a valid header)
+        
+    return 0 # false (is a valid header)
+
 # aggregate datas files for each date
 def aggregateFiles(list_dates):
     prev_iter = 0
     curr_iter = 0
+    
+    standard_header = ['County', 'Region', 'Cases', 'Confirmed', \
+                            'Probable', 'PersonsWithNegativePCR']
+
     for curr_date in list_dates:
         prev_date = list_dates[prev_iter]
         # these are file names
@@ -72,26 +89,18 @@ def aggregateFiles(list_dates):
         curr_df = pd.read_csv(curr_file)
         prev_df = pd.read_csv(prev_file)
 
-        # for exception files
-        standard_header = ['County', 'Region', 'Cases', 'Confirmed', \
-                            'Probable', 'PersonsWithNegativePCR']
-        '''changed_header = ['County', 'Fips', 'Region', 'Cases', \
-                          'Confirmed', 'Probable', 'PersonsWithNegativePCR',\
-                          'Est_Tot_Tests','Date', 'Last Date', \
-                          'Change From Last Date']'''
-
-        current_header = list(curr_df.columns)        
         # skip non standard files
-        if ( (current_header != standard_header)):
+        
+        current_header = list(curr_df.columns)  
+        
+        if (verifyHeader(current_header, standard_header, curr_file)):
             curr_iter += 1
-            print("Skipped " + curr_file + "due to nonstandard header.")
-            print("File Header: " + current_header)
             continue
         else:
             prev_iter = curr_iter
             curr_iter += 1
         
-        # augments data from the DOH wit test totals and fip numbers
+        # augments data from the DOH with test totals and fip numbers
         curr_tests = cal_tot_tests(curr_df)
         prev_tests = cal_tot_tests(prev_df)
 
@@ -111,6 +120,11 @@ def aggregateFiles(list_dates):
 
         print("Augmented file: " + curr_file)
 
+# reads in all files 
+'''
+def aggregateTests(list_dates):
+    for curr_date in list_dates:
+'''
 # END METHODS #
 
 #July Archive
@@ -135,4 +149,5 @@ dict_links = {}
 extract_data(raw_links, list_dates, dict_links)
 
 downloadData(list_dates)
+print()
 aggregateFiles(list_dates)
