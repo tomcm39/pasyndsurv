@@ -24,7 +24,7 @@ def add_test_col(data_frame, test_col):
     # estimated total tests
     data_frame['Est_Tot_Tests'] = test_col  
 
-# inserts fips row to the county 
+# inserts fips column to the df 
 def add_fips(df, countyList):
     df.insert(1, 'Fips', countyList)
 
@@ -58,19 +58,27 @@ def downloadData(list_dates):
     print()
     print("Starting data download...")
     print("_______________________________________________")
+    #counter = 0
     for curr_date in list_dates:
+        '''
+        if (counter > 2):
+            break
+        counter += 1
+        '''
         return_file = 'data/dohData_' + curr_date + '.csv'
         print("Creating file... " + return_file)
         tabula.convert_into(dict_links[curr_date], return_file, pages="all")
+        
     print()
     print("Finished downloading data!")
 
 # checks two input strings and checks if they are equal
 # for exception files
-def verifyHeader(current_header, standard_header, curr_file):
+def verifyHeader(current_header, standard_header, curr_date):
+    curr_file = 'data/dohData_' + curr_date + '.csv'
     if ( (current_header != standard_header)):
         print()
-        print("ERROR: Skipped augmentation of " + curr_file + \
+        print("ERROR: Skipped processing of " + curr_file + \
               " due to nonstandard header.")
         print(current_header)
         print()
@@ -86,21 +94,24 @@ def file_to_dictDF(list_dates, dict_df):
         dict_df.update({date: curr_df})
 
 # aggregate datas files for each date
-def aggregateFiles(list_dates):
-    prev_iter = 0
-    curr_iter = 0
+def aggregateFiles(list_dates, standard_header):
     
-    standard_header = ['County', 'Region', 'Cases', 'Confirmed', \
-                            'Probable', 'PersonsWithNegativePCR']
 
     print()
     print("Starting file augmentation...")
     print("_______________________________________________")
+
+    prev_iter = 0
+    curr_iter = 0
     for curr_date in list_dates:
+        '''
+        if (curr_iter > 2):
+            break
+        '''
         prev_date = list_dates[prev_iter]
         # these are file names
         curr_file = 'data/dohData_' + curr_date + '.csv'
-        prev_file = 'data/dohData_' + prev_date + '.csv'
+        # prev_file = 'data/dohData_' + prev_date + '.csv'
 
         print("Augmenting file... " + curr_file)
         curr_df = dict_df.get(curr_date)
@@ -108,7 +119,7 @@ def aggregateFiles(list_dates):
 
         # skip non standard files
         current_header = list(curr_df.columns)
-        if (verifyHeader(current_header, standard_header, curr_file)):
+        if (verifyHeader(current_header, standard_header, curr_date)):
             curr_iter += 1
             continue
         else:
@@ -136,9 +147,33 @@ def aggregateFiles(list_dates):
     print("Finished augmenting files!")
 
 # reads in all files 
-#def aggregateTests(list_dates):
-    #for curr_date in list_dates:
-        
+def aggregateTests(list_dates, fips_list, standard_header):
+    # adds header row as fips
+    fips_list.insert(0, "Date")
+    aggregate_df = pd.DataFrame(columns=fips_list)
+    
+    counter = 0
+    for curr_date in list_dates:
+        '''
+        if (counter > 2):
+            break
+        '''
+        # accessing list from dict based on date
+        curr_df = dict_df.get(curr_date)
+
+        # checking for error cases
+        current_header = list(curr_df.columns)
+        if (verifyHeader(current_header, standard_header, curr_date)):
+            continue
+        list_tests = list(curr_df['Change From Last Date'])
+
+        # insert date to beginning of list 
+        list_tests.insert(0, curr_date)
+        aggregate_df.loc[counter] = list_tests
+        counter += 1
+
+    aggregate_df.to_csv("aggregateData.csv", index=False)
+
 
 # END METHODS #
 
@@ -155,6 +190,7 @@ raw_links = page_soup.find_all("a", title = "County case counts by date")
 
 # organizies all fips with their county names
 # stolen from prof mcandrew
+# tbh idk how this works
 fips2county = listPACounties()
 county2fips = [fip for (fip, county) in fips2county.items()]
 
@@ -164,6 +200,13 @@ dict_links = {}
 dict_df = {}
 extract_data(raw_links, list_dates, dict_links)
 
-file_to_dictDF(list_dates, dict_df)
+initial_header = ['County', 'Region', 'Cases', 'Confirmed', \
+                            'Probable', 'PersonsWithNegativePCR']
+new_header = ['County', 'Fips', 'Region', 'Cases', 'Confirmed', \
+              'Probable', 'PersonsWithNegativePCR', 'Est_Tot_Tests', \
+              'Date', 'Last Date', 'Change From Last Date']
 downloadData(list_dates)
-aggregateFiles(list_dates)
+file_to_dictDF(list_dates, dict_df)
+aggregateFiles(list_dates, initial_header)
+#print(county2fips)
+aggregateTests(list_dates, county2fips, new_header)
