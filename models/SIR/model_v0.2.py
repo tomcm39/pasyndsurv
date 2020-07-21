@@ -123,9 +123,9 @@ if __name__ == "__main__":
 
     bin = np.random.binomial
     
-    S0 = 1000
-    I0 = 1
-    R0 = 0
+    S0 = 1000.
+    I0 = 1.
+    R0 = 0.
     
     beta=1.
     gamma=0.5
