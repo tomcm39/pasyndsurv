@@ -12,8 +12,11 @@ if __name__ == "__main__":
     for col in allData.columns: 
         print(col) 
 
+    #CODE TO SUBSET TO INDIVIDUAL COUNTIES
+    #mostrecentweek = allData.trainingweek.max()
+    #singleCounty = allData[ (allData.fips == 42091) & (allData.trainingweek==mostrecentweek)  ]
 
-    #subset data to the most recent training week and a single county
+    #run loop to get N C & S through each county
     for (fips,subsetdata) in allData.groupby(["fips"]):
         newPos = subsetdata.dohweb__numnewpos
         census = subsetdata.census
@@ -27,9 +30,4 @@ if __name__ == "__main__":
     
         #create var S : cumulative non-cases per population
         S = 1 - C
-
-        print(fips)
-        print(N)
-        print(C)
-        print(S)
 
