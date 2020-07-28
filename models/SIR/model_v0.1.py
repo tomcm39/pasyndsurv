@@ -19,18 +19,18 @@ class SIR(object):
     def S(self,Stm1,Itm1):
         return Stm1-bin(Stm1, self.beta*Itm1/self.N)
 
-    def Smean(self,Stm1,Itm1):
-        return Stm1-Stm1*self.beta*Itm1/self.N
-        
     def I(self,Stm1,Itm1):
         return Itm1 + bin( Stm1, Itm1*self.beta/self.N ) - bin(Itm1,self.gamma)
 
-    def Imean(self,Stm1,Itm1):
-        return Itm1 + Stm1*Itm1*self.beta/self.N - Itm1*self.gamma
-
     def R(self,Rtm1,Itm1):
         return Rtm1 + bin(Itm1,self.gamma)
-    
+
+    def Smean(self,Stm1,Itm1):
+        return Stm1-Stm1*self.beta*Itm1/self.N
+        
+    def Imean(self,Stm1,Itm1):
+        return Itm1 + Stm1*Itm1*self.beta/self.N - Itm1*self.gamma
+   
     def Rmean(self,Rtm1,Itm1):
         return Rtm1 + Itm1*self.gamma
 
@@ -159,5 +159,5 @@ if __name__ == "__main__":
     
     plt.show()
 
-    #TODO:
+    # TODO:
     # You need to make this a probabilistic distribution, not just the mean prediction

@@ -147,8 +147,6 @@ if __name__ == "__main__":
     epidemic.generateEpidemic(50)
     
     O = epidemic.epidemicData
-    plt.plot(O);plt.show()
-
     epidemic.inference(S0=10**3,I0=1,R0=0,observedNewConfirmedCases = O[['C']])
     
     parameterMAPS = epidemic.MAP
@@ -171,3 +169,4 @@ if __name__ == "__main__":
     ax.legend()
     plt.savefig('./example.pdf')
     plt.close()
+    

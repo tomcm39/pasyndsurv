@@ -143,7 +143,6 @@ if __name__ == "__main__":
     gammas = parameterMAPS['gamma']
     isigma,rsigma = parameterMAPS['sigma'][0]
 
-    
     epidemic = SIR(S0,I0,R0,beta = betas ,gamma = gammas )
     epidemic.generateMeanEpidemic(50)
     
