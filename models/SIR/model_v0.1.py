@@ -17,7 +17,7 @@ class SIR(object):
         self.gamma = gamma
 
     def S(self,Stm1,Itm1):
-        return Stm1-bin(Stm1, self.beta*Itm1/self.N)
+        return Stm1-bin(Stm1, self.beta*Itm1/self.N) 
 
     def I(self,Stm1,Itm1):
         return Itm1 + bin( Stm1, Itm1*self.beta/self.N ) - bin(Itm1,self.gamma)

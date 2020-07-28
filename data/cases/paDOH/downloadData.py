@@ -1,4 +1,5 @@
 # klin
+
 import sys
 sys.path.append('../..')
 
@@ -8,15 +9,16 @@ from downloadHelper.downloadtools import timestamp
 from downloadHelper.downloadtools import listPACounties
 
 if __name__ == "__main__":
-    data_link = "https://www.health.pa.gov/topics/Documents/Diseases%20and%20Conditions/COVID-19%20County%20Data/County%20Case%20Counts_6-15-2020.pdf"
+    data_link = '''https://www.health.pa.gov/topics/Documents/Diseases%20and%20
+Conditions/COVID-19%20County%20Data/County%20Case%20Counts_6-15-2020.pdf'''
 
+    # formats the return file with timestamp of retrieval
     return_file = './dohCumulative_{:s}.csv'.format(timestamp())
     tabula.convert_into(data_link, return_file, pages="all")
 
     fips2county = listPACounties()
-    print(fips2county)
+    #print(fips2county)
     county2fips = [fip for (fip, county) in fips2county.items()]
-    #print(county2fips)
 
     doh_DF = pd.read_csv(return_file)
 
