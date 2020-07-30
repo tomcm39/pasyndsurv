@@ -1,4 +1,6 @@
+#Damon Luk
 #a script that subsets the USDA data to PA - only counties
+
 
 import pandas as pd 
 
@@ -20,7 +22,7 @@ paPovertyEstimate = povertyEstimate[povertyEstimate.Stabr == "PA"]
 paUnemployment = unemployment[unemployment.Stabr == "PA"]
 #print (paUnemployment)
 
-paEducationData.to_excel('Education(PA Counties only).xlsx')
-paPopulationData.to_excel('Population Estimate(PA counties only).xlsx')
-paPovertyEstimate.to_excel('Poverty Estimate(PA counties only).xlsx')
-paUnemployment.to_excel('Unemployment(PA counties only).xlsx')
+paEducationData.to_excel('Education(PA-only).xlsx')
+paPopulationData.to_excel('PopulationEstimate(PA-only).xlsx')
+paPovertyEstimate.to_excel('PovertyEstimate(PA-only).xlsx')
+paUnemployment.to_excel('Unemployment(PA-only).xlsx')

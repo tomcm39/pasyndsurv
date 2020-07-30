@@ -169,9 +169,9 @@ if __name__ == "__main__":
     beta = 1.
     gamma = 0.5
 
-    print ("S0:" + S0)
-    print ("I0" + I0)
-    print ("R0" + R0)
+    print (S0)
+    print (I0)
+    print (R0)
 
     epidemic = SIR(S0,I0,R0,beta,gamma)
     epidemic.generateEpidemic(50)
