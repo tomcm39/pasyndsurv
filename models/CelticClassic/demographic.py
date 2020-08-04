@@ -1,5 +1,5 @@
 #Damon Luk
-#script that graphs number of new COVID-19 cases versus poverty level in the most recent week
+#script that graphs number of new COVID-19 cases versus poverty levels in the most recent week
 
 import pandas as pd
 import matplotlib.pyplot as plt 
@@ -7,11 +7,13 @@ import math
 
 
 povertyAndConfirmed = pd.read_excel("/Users/damonluk924/Desktop/pasyndsurv/models/CelticClassic/Poverty_Confirmed_Merged.xlsx")
+maxTrainingWeek = povertyAndConfirmed.trainingweek.max()
+maxEpiWeek = povertyAndConfirmed.epiweek.max()
 
-subsetPoverty = povertyAndConfirmed[ (povertyAndConfirmed.trainingweek == 202020) & (povertyAndConfirmed.epiweek == 202019)  ] #subset to the most recent week
+
+subsetPoverty = povertyAndConfirmed[ (povertyAndConfirmed.trainingweek == maxTrainingWeek) & (povertyAndConfirmed.epiweek == maxEpiWeek)  ] #subset to the most recent week
 subsetPoverty = subsetPoverty[ ["fips", "epiweek", "POVALL_2018", "MEDHHINC_2018", "cdcili__ili","dohweb__numnewpos", "census", "trainingweek"] ]
-subsetPoverty.to_excel("Poverty and Confirmed Cases Subset.xlsx")
-
+#subsetPoverty.to_excel("Poverty and Confirmed Cases Subset.xlsx")
 #print (subsetPoverty.head(20)) #to check that it works
 
 fig,axs = plt.subplots(1,2)
