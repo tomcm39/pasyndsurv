@@ -15,7 +15,7 @@ for data in range(4):
 
     subsetPoverty = povertyAndConfirmed [(povertyAndConfirmed.trainingweek == maxTrainingWeek) & (povertyAndConfirmed.epiweek == maxEpiWeek)]
     subsetPoverty = subsetPoverty[ ["fips", "epiweek", "POVALL_2018", "MEDHHINC_2018", "cdcili__ili","dohweb__numnewpos", "census", "trainingweek"] ]
-    #print(subsetPoverty.head(10)) #to test the above 
+    print(subsetPoverty.head(10)) #to test the above 
 
     fig,axs = plt.subplots(1,2)
     plt.style.use('fivethirtyeight')

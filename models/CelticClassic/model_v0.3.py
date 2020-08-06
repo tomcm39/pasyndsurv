@@ -163,15 +163,14 @@ if __name__ == "__main__":
     startWeek = singleCounty[singleCounty.modelweek == 2617]
     S0 = float(startWeek [ ["census"] ].values) #population from census minus people that are infected
     I0 = float(startWeek [ ["covidtracker__numnewpos"] ].values) #number of positive cases, but from which source?
-    #I0 = 2.
     R0 =  0. #census population - deaths - total cases 
 
     beta = 1.
     gamma = 0.5
 
-    print (S0)
-    print (I0)
-    print (R0)
+    #print (S0)
+    #print (I0)
+    #print (R0)
 
     epidemic = SIR(S0,I0,R0,beta,gamma)
     epidemic.generateEpidemic(50)
