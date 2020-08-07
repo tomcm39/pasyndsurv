@@ -1,4 +1,4 @@
-#mcandrew
+# mcandrew,kline,lin
 
 import sys
 import numpy as np
@@ -6,18 +6,47 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-class SIR(object):
-    def __init__(self,S0,I0,R0,beta,gamma):
-       
-        self.N  = S0+I0+R0
-        self.S0 = S0
-        self.C0 = 0
-        self.I0 = I0
-        self.R0 = R0
-        
-        self.beta  = beta
-        self.gamma = gamma
-   
+import statsmodels
+#from statsmodels.tsa.holtwinters import ExponentialSmoothing as eSmooth  # X marks the import statement!
+from statsmodels.tsa.statespace.exponential_smoothing import ExponentialSmoothing as eSmooth
+
+class basicSIR(object):
+    # Copy this section 
+    def __init__(self):
+        pass
+
+    def addTrainingData(self,trainingdata):
+        self.trainingdata = trainingdata
+
+    # Copy this function
+    def modeldesc(self):
+        print("The Basic SIR model")
+    
+    # Copy this function 
+    def makeForecasts(self):
+        forecastsForAllRegions = pd.DataFrame()
+        for fip in self.trainingdata.fips.unique():
+            if np.isnan(fip):
+                continue
+            
+            print('Forecasting FIPS = {:05d}'.format(int(fip)))
+            
+            regiondata = self.trainingdata[self.trainingdata.fips==fip]
+
+            if regiondata.shape[0]==0:
+                continue
+            
+            if np.all(np.isnan(regiondata.dohweb__numnewpos)):
+                continue
+            
+            forecastData = self.makeForecastForOneRegion(regiondata)
+            
+            forecastData['fips'] = fip
+            
+            forecastsForAllRegions = forecastsForAllRegions.append(forecastData)
+        return forecastsForAllRegions
+    
+    # -------------------------------This is your model code------------------------
     def generateMeanEpidemic(self,timesteps=10,sigmas=[1]):
         from scipy.integrate import odeint
 
@@ -40,7 +69,7 @@ class SIR(object):
         self.epidemicData = yobs
         self.epidemicMeanData = y
         return y
-
+    
     def inferenceCases(self,S0,I0,R0,observedCumConfirmedCases):
         import pymc3 as pm
         
@@ -94,24 +123,35 @@ class SIR(object):
 
         self.beta = MAP['beta']
         self.gamma = MAP['gamma']
-
-    def makeForecastForOneRegion(self,regiondata ):
+ 
+    def makeForecastForOneRegion(self,regiondata):
+        regiondata = regiondata.replace(np.nan,0.)
+        
         import scipy
 
         numOfWeeks = len(regiondata)
         
         newcases  = regiondata[["dohweb__numnewpos"]].values
         cuumcases = np.cumsum(newcases)
+
+        N  = int(regiondata.iloc[0].census)
+        S0 = N-1
+        I0 = 1.
+        R0 = 0.
         
-        self.inferenceCases(S0=self.S0,I0=self.I0,R0=0.,observedCumConfirmedCases = cuumcases)
-        
+        self.inferenceCases(S0=S0,I0=I0,R0=0.,observedCumConfirmedCases = cuumcases)
+
         parameterMAPS = self.MAP 
     
         betas  = parameterMAPS['beta']
-        gamma = parameterMAPS['gamma']
-
+        gamma  = parameterMAPS['gamma']
         isigma = parameterMAPS['sigmas'][0]
 
+        self.S0 = S0
+        self.I0 = I0
+        self.R0 = R0
+        self.N  = N 
+        
         self.beta = betas
         self.gamma = gamma
         
@@ -123,7 +163,6 @@ class SIR(object):
         forecastData = {'numnewcases_leftbin':[],'numnewcases_rightbin':[],'weekahead':[],'prob':[]}
         for weekahead in np.arange(0,4,1):
             
-            print(IpredictedMeansPcts[weekahead])
             dist = scipy.stats.norm(loc= self.N*IpredictedMeansPcts[weekahead] , scale = self.N*isigma )
             
             stepsize=5
@@ -141,42 +180,21 @@ class SIR(object):
             x['prob'] = x['prob']/sprob
             return x
         forecastData = forecastData.groupby(['weekahead']).apply( normalize )
-        self.forecastData = forecastData
-            
+        return forecastData
+   
+
 if __name__ == "__main__":
 
-    bin = np.random.binomial
-    
     # pull data from our git repo into python's local memory
     allData = pd.read_csv("../../data/cases/PATrainingDataCases.csv")
 
     # for now, lets subset our data to the most recent training week and a single county
     mostrecentweek = allData.trainingweek.max()
-    singleCounty = allData[(allData.fips == 42095) & (allData.trainingweek == mostrecentweek)]
-    singleTW = allData[(allData.trainingweek == mostrecentweek)]
 
-    # # until a case appears
-    firstcase = 0
-    for (idx,dta) in singleCounty.loc[:,["modelweek","dohweb__numnewpos"]].iterrows():
-        if dta.dohweb__numnewpos==0 or np.isnan(dta.dohweb__numnewpos):
-            continue
-        firstcase = dta.modelweek
-        break
+    mostRecentWeekData = allData[allData.trainingweek == mostrecentweek]
 
-    timeshift = int(firstcase - singleCounty.iloc[0]['modelweek'])
+    md = basicSIR()
+    md.addTrainingData(mostRecentWeekData)
+    md.makeForecasts()
     
-    #singleCounty =singleCounty[singleCounty.modelweek>=firstcase]
-    
-    # Looks like a few NANS show up in the data. I'm not sure why yet, but those details can be sorted out after we
-    # have our model running. For now, let's set NAN to 0
-
-    S0 = singleCounty.iloc[0]['census']- 1
-    I0 = 1.
-    R0 = 0
-    N =  S0+1
- 
-    singleCounty = singleCounty.replace(np.nan, 0.)
-    
-    epidemic = SIR(S0/N,I0/N,R0/N,1.,1.)
- 
-    epidemic.makeForecastForOneRegion(singleCounty)
+   
