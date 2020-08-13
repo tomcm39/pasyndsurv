@@ -151,8 +151,8 @@ class SIR(object):
 if __name__ == "__main__":
 
     # pull data from our git repo into python's local memory
-    allData = pd.read_csv("../../data/cases/PATrainingDataCases.csv")
-
+    allData = pd.read_csv("/Users/damonluk924/Desktop/pasyndsurv/data/cases/PATrainingDataCases.csv")
+    
     # for now, lets subset our data to the most recent training week and a single county
     mostrecentweek = allData.trainingweek.max()
     singleCounty = allData[ (allData.fips == 42095) & (allData.trainingweek==mostrecentweek)  ]
@@ -173,9 +173,9 @@ if __name__ == "__main__":
     beta  = 2. # parameters i set myself to see how well we can estimate them
     gamma = 1.
 
-    #print (S0)
-    #print (I0)
-    #print (R0)
+    print (S0)
+    print (I0)
+    print (R0)
 
     epidemic = SIR(S0/N,I0/N,R0/N,beta,gamma) # the inputs are fractions of the total pop (divded by N)
     epidemic.generateMeanEpidemic(50, 0.2)
