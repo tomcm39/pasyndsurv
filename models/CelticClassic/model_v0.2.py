@@ -139,8 +139,8 @@ if __name__ == "__main__":
     I0 = float(startWeek [ ["covidtracker__numnewpos"] ].values) #number of positive cases, but from which source?
     R0 =  0. #census population - deaths - total cases 
 
-    beta=1.
-    gamma=0.5
+    beta = 1.
+    gamma = 0.5
 
     epidemic = SIR(S0,I0,R0,beta,gamma)
     epidemic.generateEpidemic(50)
