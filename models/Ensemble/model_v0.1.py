@@ -8,7 +8,7 @@ import seaborn as sns
 #goal(week of 9/7): make an equally weighted ensemble for one week ahead, one fip for all the case bins with the most recent training week
 
 #pull sample forecast data from git repo
-forecastData = pd.read_csv("/Users/damonluk924/Desktop/pasyndsurv/scores/fulldens.csv")
+forecastData = pd.read_csv("../../scores/fulldens.csv")
 maxTrainingWeek = forecastData.forecastTW.max()
 #print (forecastData.head(20))
 
@@ -47,16 +47,12 @@ sns.lineplot(x = 'numnewcases_mid', y = 'averageProb', data = ensembleDataEz).se
 plt.xlim(0 , 80)
 plt.show()
 
-    
-
-
-
-#numnewcases_leftbin = forecastData.numnewcases_leftbin #sets variable to all the left bins
-
-
-#numnewcases_rightbin = forecastData.numnewcases_rightbin #sets variable to all the right bins
-
-
-#prob = forecastData.prob
-
-#fips = forecastData.fips
+#creates data frame with same format as other models
+#temporarily takes first 100 since we are only look at fips 42001 with weekahead 1
+ensembleForecast = pd.DataFrame({
+    'numnewcases_leftbin' : forecastData.numnewcases_leftbin[0:100],
+    'numnewcases_rightbin' : forecastData.numnewcases_rightbin[0:100],
+    'weekahead' : forecastData.weekahead[0:100],
+    'prob' : average,
+    'fips' : forecastData.fips[0:100]})
+#print(ensembleForecast)
