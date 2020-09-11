@@ -151,8 +151,8 @@ class SIR(object):
 if __name__ == "__main__":
 
     # pull data from our git repo into python's local memory
-    allData = pd.read_csv("../../data/cases/PATrainingDataCases.csv")
-
+    allData = pd.read_csv("/Users/damonluk924/Desktop/pasyndsurv/data/cases/PATrainingDataCases.csv")
+    
     # for now, lets subset our data to the most recent training week and a single county
     mostrecentweek = allData.trainingweek.max()
     singleCounty = allData[ (allData.fips == 42095) & (allData.trainingweek==mostrecentweek)  ]

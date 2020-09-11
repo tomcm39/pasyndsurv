@@ -29,19 +29,19 @@ plt.style.use('fivethirtyeight')
 
 ax = axs[0]
 for fip, data in subsetPoverty.groupby(['fips']):
-    ax.scatter(data.POVALL_2018, data.cumulativeCases, linewidth = 2, alpha = 0.55 )
+    ax.scatter(math.log10(data.POVALL_2018), data.cumulativeCases, linewidth = 2, alpha = 0.55 )
 
 ax.tick_params(which = 'both', labelsize = 8)
 ax.set_ylabel('Cumulative Number of COVID-19 cases')
-ax.set_xlabel('Estimate of people of all ages in poverty in 2018')
+ax.set_xlabel('Log10 of Estimate of people of all ages in poverty in 2018')
 
 ax = axs[1]
 for fip, data in subsetPoverty.groupby(['fips']):
-    ax.scatter(data.MEDHHINC_2018, data.cumulativeCases, linewidth = 2, alpha = 0.55)
+    ax.scatter(math.log10(data.MEDHHINC_2018), data.cumulativeCases, linewidth = 2, alpha = 0.55)
 
 ax.tick_params(which = 'both', labelsize = 8)
 ax.set_ylabel('Cumulative Number of COVID-19 cases')
-ax.set_xlabel('Estimate of median household 2018')
+ax.set_xlabel('Log10 of Estimate of median household 2018')
 
 
 fig.set_tight_layout(True)
