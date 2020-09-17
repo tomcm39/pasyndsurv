@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def equalEnsemble(probs):
     """ 
         Equally Weighted ensemble model equation
-        Inputs: probs is a list of forecats probabilities 
+        Inputs: probs is a list of forecast probabilities 
         Outputs: the EW ensemble prob
     """
 
@@ -27,8 +27,8 @@ def equalEnsemble(probs):
 if __name__ == "__main__":
 
     forecastData = pd.read_csv("../../scores/fulldens.csv") #pull sample forecast data from git repo
-    maxTrainingWeek = forecastData.forecastTW.max() #I just did one training week for now to check for errors
-    forecastData = forecastData[ (forecastData.forecastTW == maxTrainingWeek)]
+    #maxTrainingWeek = forecastData.forecastTW.max() #I just did one training week for now to check for errors
+    #forecastData = forecastData[ (forecastData.forecastTW == maxTrainingWeek)]
     forecastData = forecastData.replace(np.nan, 0)
 
     # we need to fill up this dictionary with forecasts
@@ -37,7 +37,7 @@ if __name__ == "__main__":
                          ,"numnewcases_midbin"   :[]
                          ,"fips"                 :[]
                          ,"weekahead"            :[]
-                         #,"forecastTW"           :[]
+                         ,"forecastTW"           :[]
                          ,"prob"                 :[]
     }
 
@@ -49,26 +49,30 @@ if __name__ == "__main__":
     #for TW, data in forecastData.groupby(['forecastTW']):
         #singleEWForecast['forecastTW'].append(TW)
 
-    for fips, data in forecastData.groupby(['fips']):
-        singleEWForecast['fips'].append(fips)
+    for forecastTW, data in forecastData.groupby(['forecastTW']):
 
-        for weekahead, data in forecastData.groupby(['weekahead']):
-            singleEWForecast['weekahead'].append(weekahead)
+        for fips, data in forecastData.groupby(['fips']):
+
+            for weekahead, data in forecastData.groupby(['weekahead']):
 
                 #this for loop gets us the mid point of all the bins
-            for (left_bin,right_bin), data in forecastData.groupby(['numnewcases_leftbin','numnewcases_rightbin']):
-                singleEWForecast["numnewcases_leftbin"].append(left_bin) #append data to dictionary above 
-                singleEWForecast["numnewcases_rightbin"].append(right_bin)
-                numnewcases_mid = (left_bin + right_bin) / 2.0
-                singleEWForecast["numnewcases_midbin"].append(numnewcases_mid)
-                averageProb_OneBin = equalEnsemble(data.prob)
-                singleEWForecast["prob"].append(averageProb_OneBin)
+                for (left_bin,right_bin), data in forecastData.groupby(['numnewcases_leftbin','numnewcases_rightbin']):
+                    singleEWForecast["numnewcases_leftbin"].append(left_bin) #append data to dictionary above 
+                    singleEWForecast["numnewcases_rightbin"].append(right_bin)
+                    numnewcases_mid = (left_bin + right_bin) / 2.0
+                    singleEWForecast["numnewcases_midbin"].append(numnewcases_mid)
+                    singleEWForecast['fips'].append(fips)
+                    singleEWForecast['weekahead'].append(weekahead)
+                    singleEWForecast['forecastTW'].append(forecastTW)
+                    averageProb_OneBin = equalEnsemble(data.prob)
+                    singleEWForecast["prob"].append(averageProb_OneBin)
 
-    
+
     
     # we can just use this code
     singleEWForecast = pd.DataFrame(singleEWForecast)
     
     print(singleEWForecast)
+
     
 
