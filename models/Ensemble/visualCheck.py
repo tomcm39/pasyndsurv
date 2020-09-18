@@ -10,6 +10,7 @@ import model_v02
 d = model_v02.singleEWForecast
 d = d [ (d.forecastTW == 202024) ]
 
+
 sns.style.use("fivethirtyright")
 
 fig,ax = plt.subplots()
