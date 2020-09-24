@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import statsmodels
-#from statsmodels.tsa.holtwinters import ExponentialSmoothing as eSmooth  # X marks the import statement!
 from statsmodels.tsa.statespace.exponential_smoothing import ExponentialSmoothing as eSmooth
 
 class basicSIR(object):
@@ -47,7 +46,7 @@ class basicSIR(object):
         return forecastsForAllRegions
     
     # -------------------------------This is your model code------------------------
-    def generateMeanEpidemic(self,timesteps=10,sigmas=[1]):
+    def generateMeanEpidemic(self,timesteps=10,sigmas=[1],beta=1,gamma=1,S0=0.99,I0=0.01,R=0.):
         from scipy.integrate import odeint
 
         def odem(y,t,p):
@@ -63,7 +62,7 @@ class basicSIR(object):
             return [dS,dI,dR,dc]
         
         times = np.arange(0,timesteps)
-        y     = odeint(odem,t=times,y0=[self.S0,self.I0,self.R0,0], args=((self.beta, self.gamma),) )
+        y     = odeint(odem,t=times,y0=[S0,I0,R0,0], args=((beta, gamma),) )
         yobs  = np.random.lognormal( np.log(y[:,-1]) ,sigmas)
         
         self.epidemicData = yobs
@@ -74,7 +73,7 @@ class basicSIR(object):
         import pymc3 as pm
         
         import theano
-        import theano.tensor as tt
+        import theano.tensor as tt # <-
         from theano import printing
 
         from pymc3.ode import DifferentialEquation
@@ -88,16 +87,16 @@ class basicSIR(object):
             # p= [beta,gamma,delta]
 
             dS = -1.*y[0]*y[1]*p[0]
-            dI = y[0]*y[1]*p[0] - ( p[1]*y[1] )  
+            dI = y[0]*y[1]*p[0] - ( p[1]*y[1] )  # infected
             dR = p[1]*y[1]
 
-            dc = y[0]*y[1]*p[0]
+            dc = y[0]*y[1]*p[0] # cumulative cases
 
-            return [dS,dI,dR,dc]
+            return [dS,dI,dR,dc] # last state is cumulative cases
 
         dta          =  observedCumConfirmedCases.reshape(-1,)
         #dta          = O[:,-1].reshape(-1,)
-        
+
         timesteps = len(dta)
         times     = np.arange(0,timesteps)
 
@@ -109,13 +108,16 @@ class basicSIR(object):
             t0       = 0,
         )
         with pm.Model() as model:
-            beta  = pm.Uniform('beta'  ,0.0,10.0)
-            gamma = pm.Uniform('gamma' ,0.0,10.0)
+            beta  = pm.Normal('beta'  ,2.0,1)
+            gamma = pm.Normal('gamma' ,2.0,1)
+
+            tt.printing.Print('beta')(beta)
+            tt.printing.Print('gamma')(gamma)
             
             sigmas = pm.Gamma('sigmas', 0.5,0.5, shape=1)
 
-            sir_curves = sir_model(y0=[S0,I0,R0,0], theta=[beta,gamma])
-            obs        = pm.Normal("obs", observed = dta , mu = sir_curves[:,-1], sd=sigmas)
+            sir_curves = sir_model(y0=[S0,I0,R0,0], theta=[beta,gamma]) # maybe??
+            obs        = pm.Normal("obs", observed = dta , mu = sir_curves[:,-1], sd=sigmas) # maybe?
             
         with model:
             MAP = pm.find_MAP()
@@ -126,17 +128,19 @@ class basicSIR(object):
  
     def makeForecastForOneRegion(self,regiondata):
         regiondata = regiondata.replace(np.nan,0.)
-        
+
         import scipy
 
         numOfWeeks = len(regiondata)
         
         newcases  = regiondata[["dohweb__numnewpos"]].values
-        cuumcases = np.cumsum(newcases)
 
         N  = int(regiondata.iloc[0].census)
-        S0 = N-1
-        I0 = 1.
+
+        cuumcases = np.cumsum(newcases)/N # this has to be a fraction? Tariq thinks so too. Hes not sure.
+        
+        S0 = (N-1)/N
+        I0 = 1./N
         R0 = 0.
         
         self.inferenceCases(S0=S0,I0=I0,R0=0.,observedCumConfirmedCases = cuumcases)
@@ -151,11 +155,15 @@ class basicSIR(object):
         self.I0 = I0
         self.R0 = R0
         self.N  = N 
-        
-        self.beta = betas
+
+        # changes - here
+        self.beta  = betas
         self.gamma = gamma
+
+        print(betas)
+        print(gamma)
         
-        SIRCmeans = self.generateMeanEpidemic( numOfWeeks+4, isigma )
+        SIRCmeans = self.generateMeanEpidemic( numOfWeeks+4, isigma )# here? 
 
         IpredictedMeansPcts = SIRCmeans[-4:,1]
         IpredictedMeansNums = IpredictedMeansPcts*self.N
@@ -180,8 +188,8 @@ class basicSIR(object):
             x['prob'] = x['prob']/sprob
             return x
         forecastData = forecastData.groupby(['weekahead']).apply( normalize )
+        forecastData['modelname'] = 'basicSIR'
         return forecastData
-   
 
 if __name__ == "__main__":
 
