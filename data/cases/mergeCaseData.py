@@ -34,14 +34,11 @@ class dataSource(object):
         self.data = data
         
     def pullMostRecentData(self):
-        files = glob(os.path.join(self.datafolder,"*csv"))
-        dt= pd.to_datetime('1970-01-01')
-        for n,fil in enumerate(files):
-            timestamp = pd.to_datetime( (fil.split('_')[-1].split('.')[0]) )
-            if timestamp > dt:
-                dt=timestamp
-                index_of_most_recent_file = n
-        data = pd.read_csv(files[n])
+        files = sorted(glob(os.path.join(self.datafolder,"*csv")))
+        
+        fil = files[-1]
+        timestamp = pd.to_datetime( (fil.split('_')[-1].split('.')[0]) )
+        data = pd.read_csv(fil)
 
         fldr = self.datafolder.split('/')[1]
         print("{:s} data as of {:04d}-{:02d}-{:02d}-{:02d}".format(fldr,timestamp.year,timestamp.month,timestamp.day,timestamp.hour))
