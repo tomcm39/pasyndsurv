@@ -14,7 +14,7 @@ class ARLinRegRegress(object):
 
     # Copy this function
     def modeldesc(self):
-        print("The Science Dogs model - Lin Reg")
+        print("An Autoregressive linear regression model")
     
     # Copy this function 
     def makeForecasts(self):
@@ -109,7 +109,7 @@ class ARLinRegRegress(object):
             x['prob'] = x.prob/x.prob.sum()
             return x
         forecastData = forecastData.groupby(['weekahead']).apply(normalize).reset_index()
-        forecastData['modelname'] = 'theScienceDogs'
+        forecastData['modelname'] = 'ARLinRegRegress'
 
         return forecastData
 
@@ -117,17 +117,10 @@ if __name__ == "__main__":
 
     # test packaged model
 
-    # read data
-    data = pd.read_csv('../../data/cases/PATrainingDataCases.csv')
+    sampleTrainingData = pd.read_csv("../../data/cases/PATrainingDataCases.csv")
+    sampleTrainingData = sampleTrainingData[sampleTrainingData.trainingweek==202040]
+    
+    ARLR = ARLinRegRegress()
+    ARLR.addTrainingData(sampleTrainingData)
 
-    # subset to specific training week and use only epidemic weeks in 2020
-    specificTrainingWeek = data[(data.trainingweek==202020) & (data.epiweek>201952)]
-
-    # Startup model
-    forecastingModel = sciencedogsmodel( specificTrainingWeek )
-
-    # Forecast for all regions
-    forecastsForAllRegions = forecastingModel.makeForecasts()
-
-    # Store forecasts in forecasts folder
-    forecastsForAllRegions.to_csv("../../forecasts/theScienceDogs/currentForecast/theScienceDogsForecast.csv")
+    allForecasts = ARLR.makeForecasts()
